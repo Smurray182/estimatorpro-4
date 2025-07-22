@@ -16,4 +16,4 @@ root.render(
 );
 
 // FIX: Change this from .register() to .unregister() to disable the service worker.
-serviceWorkerRegistration.unregister();
+serviceWorkerRegistration.register();

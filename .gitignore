@@ -1,0 +1,9 @@
+# Dependencies
+/node_modules
+
+# Build directory
+/build
+
+# Misc
+.DS_Store
+*.local

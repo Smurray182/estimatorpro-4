@@ -7,7 +7,7 @@
 const CACHE = "pwa-cache";
 
 // Add whichever assets you want to pre-cache here:
-const PRECACHE_ASSETS = ["/", "/index.html"];
+const PRECACHE_ASSETS = ["/static/js/main.ed9bf8df.js", "/index.html"];
 
 // Listener for the install event - pre-caches our assets
 self.addEventListener("install", (event) => {
