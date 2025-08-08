@@ -138,6 +138,7 @@ interface HomePageProps {
   onSetName: (name: string) => void;
   onDownload: () => void;
   onClearCurrent: () => void;
+  onClearAll: () => void;
   onLoad: (data: any) => void;
   onStartNewRoom: () => void;
   estimateData: EstimateState;
@@ -150,6 +151,7 @@ const HomePage: React.FC<HomePageProps> = ({
   onDownload,
   onLoad,
   onClearCurrent,
+  onClearAll,
   onStartNewRoom,
   estimateData,
 }) => {
@@ -211,6 +213,12 @@ const HomePage: React.FC<HomePageProps> = ({
 
   const handleLoadClick = () => {
     fileInputRef.current?.click();
+  };
+
+  const handleClearAllClick = () => {
+    if (window.confirm("This will remove all saved data. Continue?")) {
+      onClearAll();
+    }
   };
 
   return (
@@ -301,10 +309,14 @@ const HomePage: React.FC<HomePageProps> = ({
           >
             Clear Current / Start New
           </Button>
-          <Text fontSize="sm" color="gray.500" pt={8}>
-            &copy; {new Date().getFullYear()} Estimator Pro. All rights
-            reserved.
-          </Text>
+          <Button
+            variant="outline"
+            colorScheme="red"
+            onClick={handleClearAllClick}
+            mt={2}
+          >
+            Clear All Data
+          </Button>
         </VStack>
       </Container>
 
