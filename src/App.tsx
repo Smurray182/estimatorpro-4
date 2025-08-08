@@ -2,6 +2,8 @@ import React, { useState, useMemo, useEffect } from "react";
 import { Box, Button, Slide, useToast } from "@chakra-ui/react";
 import * as serviceWorkerRegistration from "./registerServiceWorker";
 import HomePage from "./pages/HomePage";
+import Footer from "./components/Footer";
+import useLocalStorage from "./hooks/useLocalStorage";
 import RoomLayoutToolPage from "./pages/RoomLayoutTool/RoomLayoutToolPage";
 import SavedRoomsPage from "./pages/RoomLayoutTool/SavedRoomsPage";
 import ToolsPage from "./pages/Tools/ToolsPage";
@@ -67,29 +69,10 @@ const initialEstimateState: EstimateState = {
   projectName: "",
 };
 
-const getInitialData = (): EstimateState => {
-  const savedData = localStorage.getItem("currentEstimate");
-  if (savedData) {
-    try {
-      const parsedData = JSON.parse(savedData);
-      if (parsedData && Array.isArray(parsedData.generalRemodel)) {
-        if (!parsedData.savedRooms) parsedData.savedRooms = [];
-        if (!parsedData.activeRoom) parsedData.activeRoom = null;
-        if (!parsedData.savedNotes) parsedData.savedNotes = [];
-        if (!parsedData.projectName) parsedData.projectName = "";
-        return parsedData;
-      }
-    } catch (error) {
-      console.error("Failed to parse auto-saved data from localStorage", error);
-    }
-  }
-  return initialEstimateState;
-};
-
 export default function App() {
   const [currentPage, setCurrentPage] = useState("home");
-  const [estimateData, setEstimateData] =
-    useState<EstimateState>(getInitialData);
+  const [estimateData, setEstimateData, removeEstimateData] =
+    useLocalStorage<EstimateState>("currentEstimate", initialEstimateState);
   const [showUpdate, setShowUpdate] = useState(false);
   const [waitingWorker, setWaitingWorker] = useState<ServiceWorker | null>(
     null
@@ -99,10 +82,6 @@ export default function App() {
   useEffect(() => {
     serviceWorkerRegistration.unregister();
   }, []);
-
-  useEffect(() => {
-    localStorage.setItem("currentEstimate", JSON.stringify(estimateData));
-  }, [estimateData]);
 
   const handleUpdateAccepted = () => {
     waitingWorker?.postMessage({ type: "SKIP_WAITING" });
@@ -247,11 +226,24 @@ export default function App() {
   const handleClearCurrent = () => {
     setEstimateData(initialEstimateState);
     navigateTo("home");
-    localStorage.removeItem("currentEstimate");
+    removeEstimateData();
     toast({
       title: "Estimate Cleared",
       description: "Your current work has been reset.",
       status: "info",
+      duration: 3000,
+      isClosable: true,
+    });
+  };
+
+  const handleClearAll = () => {
+    localStorage.clear();
+    setEstimateData(initialEstimateState);
+    navigateTo("home");
+    toast({
+      title: "All Data Cleared",
+      description: "All saved data has been removed.",
+      status: "warning",
       duration: 3000,
       isClosable: true,
     });
@@ -293,6 +285,7 @@ export default function App() {
       onDownload: handleDownloadEstimate,
       onLoad: handleLoadEstimate,
       onClearCurrent: handleClearCurrent,
+      onClearAll: handleClearAll,
       projectName: estimateData.projectName,
     };
 
@@ -391,6 +384,7 @@ export default function App() {
         `}</style>
         {renderPage()}
       </div>
+      <Footer />
       <Slide direction="bottom" in={showUpdate} style={{ zIndex: 20 }}>
         <Box
           p="4"
